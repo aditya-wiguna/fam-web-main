@@ -1,0 +1,31 @@
+import { type RouteConfig, index, route, layout } from "@react-router/dev/routes";
+
+export default [
+  layout("layouts/main.tsx", [
+    index("routes/home.tsx"),
+    route("portfolio", "routes/portfolio.tsx"),
+    route("orders", "routes/orders.tsx"),
+    route("profile", "routes/profile.tsx"),
+  ]),
+  route("login", "routes/login.tsx"),
+  route("signup", "routes/signup.tsx"),
+  route("reset-password", "routes/reset-password.tsx"),
+  route("auth/callback", "routes/auth.callback.tsx"),
+  route("fund/:id", "routes/fund-details.tsx"),
+  route("subscribe", "routes/subscribe.tsx"),
+  route("subscribe/success", "routes/subscribe-success.tsx"),
+  route("redeem", "routes/redeem.tsx"),
+  route("redeem/success", "routes/redeem-success.tsx"),
+  route("contact", "routes/contact.tsx"),
+  route("personal-details", "routes/personal-details.tsx"),
+  route("personal-details/edit", "routes/personal-details-edit.tsx"),
+  route("declarations", "routes/declarations.tsx"),
+  route("declarations/edit", "routes/declarations-edit.tsx"),
+  route("risk-assessment", "routes/risk-assessment.tsx"),
+  route("risk-assessment/form", "routes/risk-assessment-form.tsx"),
+  route("risk-profile", "routes/risk-profile.tsx"),
+  route("risk-profile/selection", "routes/risk-profile-selection.tsx"),
+  route("change-password", "routes/change-password.tsx"),
+  route("terms", "routes/terms.tsx"),
+  route("privacy", "routes/privacy.tsx"),
+] satisfies RouteConfig;
