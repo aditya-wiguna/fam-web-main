@@ -28,11 +28,11 @@ export function Button({
   } else if (outline) {
     variantStyles = darkBackground
       ? "bg-transparent border border-white text-white hover:bg-white/10"
-      : "bg-transparent border border-teal-700 text-teal-700 hover:bg-teal-50";
+      : "bg-transparent border border-[#10368c] text-[#10368c] hover:bg-[#EEF3FF]";
   } else {
     variantStyles = darkBackground
-      ? "bg-white border border-white text-teal-700 hover:bg-gray-100"
-      : "bg-teal-700 border border-teal-700 text-gray-50 hover:bg-teal-800";
+      ? "bg-white border border-white text-[#10368c] hover:bg-gray-100"
+      : "bg-[#10368c] border border-[#10368c] text-gray-50 hover:bg-[#0C2463]";
   }
 
   return (

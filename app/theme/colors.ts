@@ -1,15 +1,29 @@
 // Color palette matching the mobile app
+// Main brand color: Purple #10368c
 const colors = {
-  teal900: "#203333",
-  teal800: "#1F4B4A",
-  teal700: "#165F5D",
-  teal600: "#2B8886",
-  teal500: "#48B1AE",
-  teal400: "#6CD9D7",
-  teal300: "#96FFFC",
-  teal200: "#B5FFFD",
-  teal100: "#D5FFFE",
-  teal50: "#F4FFFE",
+  // Purple color scheme (primary brand color)
+  purple900: "#080D2E",
+  purple800: "#0A1847",
+  purple700: "#0C2463",
+  purple600: "#10368C", // Main purple
+  purple500: "#1847B0",
+  purple400: "#3366CC",
+  purple300: "#6699DD",
+  purple200: "#99BBEE",
+  purple100: "#CCDDFF",
+  purple50: "#EEF3FF",
+
+  // Legacy teal colors (kept for backward compatibility, mapped to purple)
+  teal900: "#080D2E",
+  teal800: "#0A1847",
+  teal700: "#0C2463",
+  teal600: "#10368C",
+  teal500: "#1847B0",
+  teal400: "#3366CC",
+  teal300: "#6699DD",
+  teal200: "#99BBEE",
+  teal100: "#CCDDFF",
+  teal50: "#EEF3FF",
 
   grey900: "#0F172A",
   grey800: "#1E293B",
@@ -40,7 +54,8 @@ const colors = {
   navyBlue: "#0D144F",
   black: "#222222",
   green: "#10B981",
-  teal: "#49C5C2",
+  teal: "#10368C", // Now purple
+  purple: "#10368C", // Main purple
   blue: "#155CA1",
 
   yellow: "#DEA32C",
@@ -59,7 +74,8 @@ const colors = {
   background: "#FCFCFC",
   transparent: "transparent",
   whiteRGBA: "rgba(252, 255, 253, 0.9)",
-  tealRGBA: "rgba(39, 157, 153, 0.5)",
+  tealRGBA: "rgba(16, 54, 140, 0.5)", // Now purple RGBA
+  purpleRGBA: "rgba(16, 54, 140, 0.5)",
   whiteRGBA50: "rgba(252, 255, 253, 0.5)",
 } as const;
 

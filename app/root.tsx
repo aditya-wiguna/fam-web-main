@@ -34,8 +34,7 @@ export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
   { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" },
-  { rel: "manifest", href: "/manifest.json" },
-  { rel: "apple-touch-icon", href: "/icon-192.png" },
+  { rel: "manifest", href: "/manifest.json" }
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -44,7 +43,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-        <meta name="theme-color" content="#165F5D" />
+        <meta name="theme-color" content="#10368c" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <Meta />
@@ -175,13 +174,83 @@ export default function App() {
         const userId = idToken?.payload?.["x-user-id"] as string;
 
         // Set user in context
-        setUser({
+        const userData = {
           userId: userId || currentUser.userId,
           username: currentUser.username,
           email: currentUser.signInDetails?.loginId,
-        });
+        };
+        setUser(userData);
         
         console.log("Existing auth session found:", currentUser.username);
+        
+        // Load profile data if we have a userId
+        if (userData.userId) {
+          try {
+            const { api } = await import("./services/api");
+            const result = await api.get<Profile[]>(`/customer/v1/customers?query=userId==${userData.userId}`);
+            if (result && result.length > 0) {
+              // Update profile directly using setProfile and setTier
+              const profileData = result[0];
+              let newTier = 0;
+              if (profileData) {
+                if (profileData.investor && profileData.investorId) {
+                  newTier = 3;
+                } else if (validator.checkClientProfileComplete(profileData as Record<string, unknown>)) {
+                  newTier = 2;
+                } else {
+                  newTier = 1;
+                }
+              }
+              setTier(newTier);
+              setProfile(profileData);
+              
+              // Load risk profile data using customerId (profile.id), not userId
+              if (profileData.id) {
+                try {
+                  const riskResult = await api.get<Array<{ 
+                    formTemplate?: { form?: { riskProfiles?: Array<{
+                      id?: string;
+                      name?: string;
+                      description?: unknown;
+                      investmentObjective?: unknown;
+                      riskTolerance?: unknown;
+                      riskRating?: string[];
+                      scoreAssignment?: { min: number; max: number };
+                    }> } }; 
+                    riskScore?: number; 
+                    templateId?: string 
+                  }>>(
+                    `/customer/v1/customers/${profileData.id}/risk-profiles?sortOrders=-createdDate`
+                  );
+                  if (riskResult && riskResult.length > 0) {
+                    const riskData = riskResult[0];
+                    const riskProfiles = riskData.formTemplate?.form?.riskProfiles || [];
+                    let selectedProfile = null;
+                    if (riskProfiles.length > 0 && riskData.riskScore !== undefined) {
+                      selectedProfile = riskProfiles.find(
+                        (profile) => {
+                          if (!profile.scoreAssignment) return false;
+                          const { min, max } = profile.scoreAssignment;
+                          return riskData.riskScore! >= min && riskData.riskScore! <= max;
+                        }
+                      );
+                    }
+                    setRiskProfile({
+                      profiles: riskProfiles as RiskProfile["profiles"],
+                      profile: selectedProfile as RiskProfile["profile"],
+                      templateId: riskData.templateId,
+                      riskScore: riskData.riskScore,
+                    });
+                  }
+                } catch (riskError) {
+                  console.log("No risk profile found or error loading:", riskError);
+                }
+              }
+            }
+          } catch (profileError) {
+            console.error("Error loading profile:", profileError);
+          }
+        }
       } catch (e) {
         // No authenticated user - this is normal for visitors
         console.log("No existing auth session");
@@ -189,6 +258,7 @@ export default function App() {
     };
 
     checkAuthSession();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

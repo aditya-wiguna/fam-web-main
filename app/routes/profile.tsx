@@ -5,6 +5,7 @@ import { H1, P, Button, Card, TopNav, Small } from "../components";
 import { HighlightHeader, HighlightBody } from "../components/Highlight";
 import { AuthContext, ProfileContext } from "../contexts";
 import { ProfileDataField } from "../utils/ProfileDataField";
+import { useAuth } from "../services";
 import {
   IoPersonOutline,
   IoShieldCheckmarkOutline,
@@ -20,11 +21,12 @@ import {
 export default function Profile() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { user, updateAuthData } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
   const { profile, riskProfile } = useContext(ProfileContext);
+  const { signOut } = useAuth();
 
   const handleLogout = async () => {
-    await updateAuthData(null);
+    await signOut();
     navigate("/");
   };
 
@@ -135,7 +137,7 @@ export default function Profile() {
                 </div>
                 <button
                   onClick={() => navigate("/risk-profile")}
-                  className="text-teal-300 text-sm"
+                  className="text-[#6699DD] text-sm"
                 >
                   View →
                 </button>

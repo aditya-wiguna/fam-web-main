@@ -6,7 +6,7 @@ import numeral from "numeral";
 import { H1, H2, P, Button, Card, TopNav, Small, Tiny } from "../components";
 import { HighlightHeader, HighlightBody } from "../components/Highlight";
 import { AuthContext } from "../contexts";
-import { useOrders, type Order } from "../services";
+import { useOrders, useAuth, type Order } from "../services";
 import noOrderImage from "../assets/images/noOrder.png";
 import colors from "../theme/colors";
 
@@ -16,11 +16,12 @@ const unitFormat = "0,0.000";
 export default function Orders() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { user, updateAuthData } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
   const { orders, loading } = useOrders();
+  const { signOut } = useAuth();
 
   const handleLogout = async () => {
-    await updateAuthData(null);
+    await signOut();
     navigate("/");
   };
 
@@ -29,9 +30,7 @@ export default function Orders() {
       <div className="min-h-screen">
         <HighlightHeader>
           <TopNav inverse showLogo />
-          <div className="px-5 pb-6">
-            <H1 color="white" className="text-[28px] mt-0 mb-1">{t("orders:heading.title")}</H1>
-          </div>
+          <H1 color="white" className="text-3xl mb-2">{t("orders:heading.title")}</H1>
         </HighlightHeader>
         <HighlightBody className="min-h-[60vh]">
           <div className="text-center py-12">
@@ -94,15 +93,13 @@ export default function Orders() {
     <div className="min-h-screen">
       <HighlightHeader>
         <TopNav inverse showLogo showLogout onLogout={handleLogout} />
-        <div className="px-5 pb-6">
-          <H1 color="white" className="text-[28px] mt-0 mb-1">{t("orders:heading.title")}</H1>
-        </div>
+        <H1 color="white" className="text-3xl mb-2">{t("orders:heading.title")}</H1>
       </HighlightHeader>
 
-      <HighlightBody color="whiteRGBA" className="min-h-[60vh] pb-24">
+      <HighlightBody color="whiteRGBA" className="min-h-[50vh] pb-24">
         {loading && (
           <div className="flex justify-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-700" />
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#10368c]" />
           </div>
         )}
 
@@ -127,8 +124,7 @@ export default function Orders() {
         {!loading && dateOrders.map(({ orderDate, orders }) => (
           <div key={orderDate}>
             <H2 
-              color="white" 
-              className="text-2xl font-extralight mt-6 mb-5"
+              className="text-xl font-light mt-6 mb-4"
             >
               {orderDate}
             </H2>

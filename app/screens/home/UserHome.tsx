@@ -2,8 +2,9 @@ import { useContext, useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { H1, H2, H4, P, TopNav, Skeleton } from "../../components";
 import { HighlightHeader, HighlightBody } from "../../components/Highlight";
-import { AuthContext, ProfileContext, UIContext } from "../../contexts";
+import { ProfileContext, UIContext } from "../../contexts";
 import { useStrategies } from "../../services/useStrategies";
+import { useAuth } from "../../services";
 import { StrategyInfo } from "./StrategyInfo";
 import { FundList } from "./FundList";
 import { PortfolioInfo } from "./PortfolioInfo";
@@ -14,7 +15,7 @@ import colors from "../../theme/colors";
 export function UserHome() {
   const { t } = useTranslation();
   const { strategies, loading } = useStrategies();
-  const { updateAuthData } = useContext(AuthContext);
+  const { signOut } = useAuth();
   const { profile, portfolio, portfolioSummary } = useContext(ProfileContext);
   const { uiState, setUiState } = useContext(UIContext);
   const [selectedStrategyId, setSelectedStrategyId] = useState<string | null>(
@@ -43,7 +44,7 @@ export function UserHome() {
     mask.maskEmail(profile?.[ProfileDataField.CONTACT_EMAIL] as string);
 
   const handleLogout = async () => {
-    await updateAuthData(null);
+    await signOut();
   };
 
   return (
@@ -89,7 +90,7 @@ export function UserHome() {
                           ? "font-semibold"
                           : "font-semibold"
                       }`}
-                      color={selectedStrategyId === id ? "teal500" : "black"}
+                      color={selectedStrategyId === id ? "purple500" : "black"}
                     >
                       {title}
                     </P>
@@ -99,8 +100,8 @@ export function UserHome() {
                       className="h-0.5 w-10"
                       style={{ 
                         borderBottomWidth: 2, 
-                        borderBottomColor: colors.teal500,
-                        backgroundColor: colors.teal500 
+                        borderBottomColor: colors.purple500,
+                        backgroundColor: colors.purple500 
                       }}
                     />
                   )}

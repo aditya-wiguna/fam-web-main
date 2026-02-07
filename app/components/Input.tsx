@@ -25,7 +25,7 @@ export function Input({
         onChange={(e) => onValueChange?.(e.target.value)}
         className={cn(
           "w-full p-4 border border-gray-200 bg-white rounded text-sm",
-          "focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent",
+          "focus:outline-none focus:ring-2 focus:ring-[#10368c] focus:border-transparent",
           "placeholder:text-gray-400",
           error && "border-red-500",
           className

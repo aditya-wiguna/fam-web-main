@@ -6,7 +6,7 @@ import { AuthContext } from "../contexts";
 import { useAuth } from "../services";
 import { validator } from "../utils/validator";
 import { mask } from "../utils/mask";
-import logoBig from "../assets/images/logo-big.png";
+import logoBig from "../assets/images/ascend-logo.svg";
 import colors from "../theme/colors";
 
 type View = "login" | "mfa";

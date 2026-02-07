@@ -45,6 +45,7 @@
     "error.profile.load": "Unable to load profile details",
     "error.profile.save": "Unable to save profile details",
     "error.profile.remove": "Unable to remove profile",
+    "error.declaration.save": "Unable to save declaration details",
     "error.strategies.load": "Unable to load strategies",
     "error.product.load": "Unable to load product",
     "error.fund.load": "Unable to load fund",

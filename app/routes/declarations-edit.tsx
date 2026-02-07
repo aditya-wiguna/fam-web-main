@@ -2,7 +2,7 @@ import { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { H1, P, Button, Input, TopNav, Alert, Skeleton } from "../components";
-import { ProfileContext } from "../contexts";
+import { ProfileContext, AuthContext } from "../contexts";
 import { ProfileDataField } from "../utils/ProfileDataField";
 import { useProfileService } from "../services/useProfileService";
 import { useFormTemplateService, FormTemplateKey, type FormTemplate } from "../services";
@@ -49,6 +49,7 @@ const EmploymentStatusDefaultOptions = [
 export default function DeclarationsEdit() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
   const { profile, updateProfileData } = useContext(ProfileContext);
   const { saveDeclarationInfo, get, loading, error } = useProfileService();
   const { getLatestPublished, loading: templateLoading, error: templateError } = useFormTemplateService();
@@ -109,7 +110,8 @@ export default function DeclarationsEdit() {
     }
   };
 
-  if (!profile) {
+  // Show login message if not authenticated
+  if (!user) {
     return (
       <div className="min-h-screen bg-white">
         <div className="px-5">
@@ -117,6 +119,23 @@ export default function DeclarationsEdit() {
           <div className="text-center py-12">
             <P>{t("common:text.pleaseLogin")}</P>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading while profile is being fetched
+  if (!profile) {
+    return (
+      <div className="min-h-screen bg-white pb-8">
+        <div className="px-5">
+          <TopNav allowBack onBack={() => navigate("/declarations")} />
+          <div className="pb-4">
+            <H1>{t("declaration:heading.title")}</H1>
+          </div>
+          <Skeleton loading={true}>
+            <div className="h-64" />
+          </Skeleton>
         </div>
       </div>
     );

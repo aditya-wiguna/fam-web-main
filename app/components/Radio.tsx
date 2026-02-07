@@ -35,15 +35,15 @@ export function Radio({
           className={cn(
             "w-5 h-5 rounded-full border-2 flex items-center justify-center",
             value 
-              ? disabled ? "border-gray-400" : "border-teal-500"
-              : disabled ? "border-gray-300" : "border-teal-500"
+              ? disabled ? "border-gray-400" : "border-[#10368c]"
+              : disabled ? "border-gray-300" : "border-[#10368c]"
           )}
         >
           {value && (
             <div 
               className={cn(
                 "w-2.5 h-2.5 rounded-full",
-                disabled ? "bg-gray-400" : "bg-teal-500"
+                disabled ? "bg-gray-400" : "bg-[#10368c]"
               )}
             />
           )}

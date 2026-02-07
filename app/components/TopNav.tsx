@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { IoArrowBack, IoLogOutOutline } from "react-icons/io5";
 import { cn } from "../utils/cn";
 import type { ReactNode } from "react";
-import appLogo from "../assets/images/app_logo.png";
+import appLogo from "../assets/images/ascend-logo.svg";
 
 interface TopNavProps {
   allowBack?: boolean;
@@ -52,11 +52,13 @@ export function TopNav({
           </button>
         )}
         {showLogo && (
-          <img 
-            src={appLogo} 
-            alt="FAM Invest" 
-            className="h-8 w-auto"
-          />
+          <div className="bg-white rounded-lg p-1.5">
+            <img 
+              src={appLogo} 
+              alt="FAM Invest" 
+              className="h-8 w-auto"
+            />
+          </div>
         )}
         {title && (
           <span className="font-medium">{title}</span>

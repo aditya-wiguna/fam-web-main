@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { H1, P, Small, TopNav, Link, Card, Skeleton, Alert } from "../components";
-import { ProfileContext } from "../contexts";
+import { ProfileContext, AuthContext } from "../contexts";
 import { ProfileDataField } from "../utils/ProfileDataField";
 import { useFormTemplateService, FormTemplateKey, type FormTemplate } from "../services";
 
@@ -27,6 +27,7 @@ const fieldList = [
 export default function Declarations() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
   const { profile } = useContext(ProfileContext);
   const { getLatestPublished, loading, error } = useFormTemplateService();
   const [formTemplate, setFormTemplate] = useState<FormTemplate | null>(null);
@@ -43,7 +44,8 @@ export default function Declarations() {
     loadTemplate();
   }, [getLatestPublished]);
 
-  if (!profile) {
+  // Show login message if not authenticated
+  if (!user) {
     return (
       <div className="min-h-screen bg-white">
         <div className="px-5">
@@ -51,6 +53,27 @@ export default function Declarations() {
           <div className="text-center py-12">
             <P>{t("common:text.pleaseLogin")}</P>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading while profile is being fetched
+  if (!profile) {
+    return (
+      <div className="min-h-screen bg-gray-50 pb-8">
+        <div className="bg-white">
+          <div className="px-5">
+            <TopNav allowBack onBack={() => navigate("/profile")} />
+            <div className="pb-5">
+              <H1>{t("declaration:heading.title")}</H1>
+            </div>
+          </div>
+        </div>
+        <div className="px-5 pt-5">
+          <Skeleton loading={true}>
+            <div className="h-64" />
+          </Skeleton>
         </div>
       </div>
     );

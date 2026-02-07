@@ -12,7 +12,7 @@ interface LinkProps {
 
 export function Link({ children, to, disabled, className, onClick }: LinkProps) {
   const linkStyles = cn(
-    "font-semibold text-teal-600 hover:text-teal-700 cursor-pointer",
+    "font-semibold text-[#10368c] hover:text-[#0C2463] cursor-pointer",
     disabled && "text-gray-500 cursor-not-allowed",
     className
   );

@@ -93,13 +93,13 @@ export function PinField({
               "border-2 transition-colors",
               "focus:outline-none",
               focusedIndex === index
-                ? "border-teal-500 bg-white"
+                ? "border-[#10368c] bg-white"
                 : value[index]
                 ? "border-green-500 bg-gray-100"
                 : "border-gray-200 bg-gray-100"
             )}
             style={{
-              color: focusedIndex === index ? colors.teal : colors.black,
+              color: focusedIndex === index ? colors.purple : colors.black,
             }}
           />
         ))}

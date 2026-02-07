@@ -5,6 +5,7 @@ import numeral from "numeral";
 import { H1, H2, P, Button, Card, TopNav, Small } from "../components";
 import { HighlightHeader, HighlightBody } from "../components/Highlight";
 import { AuthContext, ProfileContext } from "../contexts";
+import { useAuth } from "../services";
 import noPortfolioImage from "../assets/images/noPortfolio.png";
 
 const Currencies = {
@@ -17,19 +18,20 @@ const currencies = [Currencies.Sgd, Currencies.Usd];
 export default function Portfolio() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { user, updateAuthData } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
   const { portfolio, portfolioSummary } = useContext(ProfileContext);
+  const { signOut } = useAuth();
   const [selectedCurrency, setSelectedCurrency] = useState(currencies[0]);
 
   const handleLogout = async () => {
-    await updateAuthData(null);
+    await signOut();
     navigate("/");
   };
 
   if (!user) {
     return (
       <div className="min-h-screen">
-        <HighlightHeader color="grey900">
+        <HighlightHeader>
           <TopNav inverse showLogo />
           <H1 color="white" className="text-3xl mb-2">{t("portfolio:heading.title")}</H1>
         </HighlightHeader>
@@ -48,7 +50,7 @@ export default function Portfolio() {
   if (!hasPortfolio) {
     return (
       <div className="min-h-screen">
-        <HighlightHeader color="grey900">
+        <HighlightHeader>
           <TopNav inverse showLogo showLogout onLogout={handleLogout} />
           <H1 color="white" className="text-3xl mb-2">{t("portfolio:heading.title")}</H1>
         </HighlightHeader>
@@ -79,54 +81,58 @@ export default function Portfolio() {
   });
 
   return (
-    <div className="min-h-screen bg-gray-900">
-      <HighlightHeader color="grey900">
+    <div className="min-h-screen">
+      <HighlightHeader>
         <TopNav inverse showLogo showLogout onLogout={handleLogout} />
         
-        {/* Currency selector */}
-        <div className="flex justify-end gap-4 mb-4">
-          {currencies.map((currency) => (
-            <button
-              key={currency.id}
-              onClick={() => setSelectedCurrency(currency)}
-              className={`text-sm px-2 py-1 ${
-                selectedCurrency.id === currency.id
-                  ? "text-teal-400 border-b-2 border-teal-400"
-                  : "text-gray-400"
-              }`}
-            >
-              {currency.name}
-            </button>
-          ))}
-        </div>
-
-        {/* Portfolio Summary */}
-        <div className="mb-6">
-          <Small color="grey400">{t("portfolio:heading.totalAccountValue")}</Small>
-          <div className="text-4xl font-bold text-white tracking-wide my-2">
-            {selectedCurrency.symbol}{numeral(totalAssetValue).format("0,0")}
+        <div className="mb-4">
+          <H1 color="white" className="text-3xl mb-2">{t("portfolio:heading.title")}</H1>
+          
+          {/* Currency selector */}
+          <div className="flex gap-4 mb-4">
+            {currencies.map((currency) => (
+              <button
+                key={currency.id}
+                onClick={() => setSelectedCurrency(currency)}
+                className={`text-sm px-2 py-1 ${
+                  selectedCurrency.id === currency.id
+                    ? "text-[#6699DD] border-b-2 border-[#6699DD]"
+                    : "text-gray-400"
+                }`}
+              >
+                {currency.name}
+              </button>
+            ))}
           </div>
-          {profitLoss !== undefined && (
-            <P color={isPositive ? "success" : "error"}>
-              {isPositive ? "+" : ""}{selectedCurrency.symbol}{numeral(Math.abs(profitLoss)).format("0,0.00")} ({numeral(profitLossPercentage).format("0.00")}%)
-            </P>
-          )}
-        </div>
 
-        <div className="flex gap-8 mb-4">
-          <div>
-            <Small color="grey400">{t("portfolio:heading.totalDeposit")}</Small>
-            <P color="white">{selectedCurrency.symbol}{numeral(totalDeposit).format("0,0.00")}</P>
+          {/* Portfolio Summary */}
+          <div className="mb-4">
+            <Small color="grey400">{t("portfolio:heading.totalAccountValue")}</Small>
+            <div className="text-4xl font-bold text-white tracking-wide my-2">
+              {selectedCurrency.symbol}{numeral(totalAssetValue).format("0,0")}
+            </div>
+            {profitLoss !== undefined && (
+              <P color={isPositive ? "success" : "error"}>
+                {isPositive ? "+" : ""}{selectedCurrency.symbol}{numeral(Math.abs(profitLoss)).format("0,0.00")} ({numeral(profitLossPercentage).format("0.00")}%)
+              </P>
+            )}
           </div>
-          <div>
-            <Small color="grey400">{t("portfolio:heading.totalWithdrawal")}</Small>
-            <P color="white">{selectedCurrency.symbol}{numeral(totalWithdrawal).format("0,0.00")}</P>
+
+          <div className="flex gap-8">
+            <div>
+              <Small color="grey400">{t("portfolio:heading.totalDeposit")}</Small>
+              <P color="white">{selectedCurrency.symbol}{numeral(totalDeposit).format("0,0.00")}</P>
+            </div>
+            <div>
+              <Small color="grey400">{t("portfolio:heading.totalWithdrawal")}</Small>
+              <P color="white">{selectedCurrency.symbol}{numeral(totalWithdrawal).format("0,0.00")}</P>
+            </div>
           </div>
         </div>
       </HighlightHeader>
 
-      <div className="px-5 pb-24">
-        <H2 color="white" className="text-xl font-light mt-8 mb-4">
+      <HighlightBody color="whiteRGBA" className="min-h-[50vh] pb-24">
+        <H2 className="text-xl font-light mt-4 mb-4">
           {t("portfolio:heading.accountHolding")}
         </H2>
 
@@ -169,7 +175,7 @@ export default function Portfolio() {
             </Card>
           );
         })}
-      </div>
+      </HighlightBody>
     </div>
   );
 }

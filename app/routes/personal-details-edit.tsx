@@ -2,8 +2,8 @@ import { useState, useContext, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { useTranslation } from "react-i18next";
 import dayjs from "dayjs";
-import { H1, P, Button, Input, TopNav, Alert, Link } from "../components";
-import { ProfileContext } from "../contexts";
+import { H1, P, Button, Input, TopNav, Alert, Link, Skeleton } from "../components";
+import { ProfileContext, AuthContext } from "../contexts";
 import { ProfileDataField } from "../utils/ProfileDataField";
 import { useProfileService } from "../services/useProfileService";
 
@@ -27,6 +27,7 @@ export default function PersonalDetailsEdit() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { user } = useContext(AuthContext);
   const { profile, riskProfile, updateProfileData } = useContext(ProfileContext);
   const { save, get, loading, error } = useProfileService();
   
@@ -116,7 +117,8 @@ export default function PersonalDetailsEdit() {
     navigate("/");
   };
 
-  if (!profile) {
+  // Show login message if not authenticated
+  if (!user) {
     return (
       <div className="min-h-screen bg-white">
         <div className="px-5">
@@ -124,6 +126,23 @@ export default function PersonalDetailsEdit() {
           <div className="text-center py-12">
             <P>{t("common:text.pleaseLogin")}</P>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading while profile is being fetched
+  if (!profile) {
+    return (
+      <div className="min-h-screen bg-white pb-8">
+        <div className="px-5">
+          <TopNav allowBack onBack={() => navigate("/personal-details")} />
+          <div className="pb-4">
+            <H1>{t("personalDetails:heading.title")}</H1>
+          </div>
+          <Skeleton loading={true}>
+            <div className="h-64" />
+          </Skeleton>
         </div>
       </div>
     );

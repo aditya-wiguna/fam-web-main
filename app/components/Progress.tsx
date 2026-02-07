@@ -25,7 +25,7 @@ export function Progress({
           className={cn(
             "rounded-full flex-grow max-w-[60px]",
             i + 1 <= currentStep
-              ? darkBackground ? "bg-teal-400" : "bg-teal-900"
+              ? darkBackground ? "bg-[#3366CC]" : "bg-[#10368c]"
               : darkBackground ? "bg-white/50" : "bg-gray-400"
           )}
         />
