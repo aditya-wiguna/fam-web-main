@@ -1,14 +1,16 @@
 import { useState, useContext, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
+import HCaptcha from "@hcaptcha/react-hcaptcha";
 import { Button, Input, Alert, TopNav, Link, H1, P, PinField } from "../components";
 import { AuthContext } from "../contexts";
-import { useAuth } from "../services";
+import { useAuth, useProfileService } from "../services";
 import { validator } from "../utils/validator";
 import { mask } from "../utils/mask";
 import successImage from "../assets/images/success.png";
 import colors from "../theme/colors";
 import { IoCheckmarkCircle } from "react-icons/io5";
+import hCaptchaConfig from "../config/hcaptcha.config";
 
 type Step = "type" | "email" | "password" | "verification" | "autoLogin" | "success";
 
@@ -20,6 +22,7 @@ export default function Signup() {
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
   const { signUp, confirmSignUp, resendSignUpVerificationCode, signIn, loading, error: authError } = useAuth();
+  const { getUnregistered } = useProfileService();
   
   const [step, setStep] = useState<Step>("type");
   const [existingClient, setExistingClient] = useState(false);
@@ -30,6 +33,8 @@ export default function Signup() {
   const [verificationCode, setVerificationCode] = useState("");
   const [error, setError] = useState("");
   const [submit, setSubmit] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState("");
+  const captchaRef = useRef<HCaptcha>(null);
 
   // OTP expiry countdown
   const [verificationCodeExpiry, setVerificationCodeExpiry] = useState<Date | null>(null);
@@ -90,19 +95,53 @@ export default function Signup() {
     e.preventDefault();
     if (!isValidEmail()) return;
 
+    // Trigger hCaptcha verification
+    captchaRef.current?.execute();
+  };
+
+  const onCaptchaVerify = async (token: string) => {
+    setCaptchaToken(token);
+    
     try {
       setSubmit(true);
       setError("");
       
-      // TODO: Check if email is registered with getUnregistered API
-      // For now, just proceed to password step
+      // Check if email is registered with getUnregistered API
+      const { registered, data } = await getUnregistered(email, token);
+      const existingCustomer = typeof registered !== "undefined";
       
       setSubmit(false);
-      setStep("password");
+
+      if (registered) {
+        setError(t("signup:error.signup"));
+        captchaRef.current?.resetCaptcha();
+      } else if (existingClient && !existingCustomer) {
+        setError(t("signup:error.signup"));
+        captchaRef.current?.resetCaptcha();
+      } else if (!existingClient && existingCustomer) {
+        setError(t("signup:error.signup"));
+        captchaRef.current?.resetCaptcha();
+      } else {
+        // Set firstName if returned from API
+        if (data?.firstName) {
+          setFirstName(data.firstName);
+        }
+        setStep("password");
+      }
     } catch (e) {
       setSubmit(false);
       setError(t("signup:error.signup"));
+      captchaRef.current?.resetCaptcha();
     }
+  };
+
+  const onCaptchaExpire = () => {
+    setCaptchaToken("");
+  };
+
+  const onCaptchaError = () => {
+    setCaptchaToken("");
+    setError(t("signup:error.captcha"));
   };
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
@@ -263,6 +302,16 @@ export default function Signup() {
                   />
                 </div>
 
+                {/* Invisible hCaptcha */}
+                <HCaptcha
+                  ref={captchaRef}
+                  sitekey={hCaptchaConfig.siteKey}
+                  size="invisible"
+                  onVerify={onCaptchaVerify}
+                  onExpire={onCaptchaExpire}
+                  onError={onCaptchaError}
+                />
+
                 <Button
                   type="submit"
                   disabled={!isValidEmail()}
@@ -275,7 +324,7 @@ export default function Signup() {
 
             {submit && (
               <div className="flex justify-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#10368c]" />
               </div>
             )}
 
@@ -346,7 +395,7 @@ export default function Signup() {
 
             {submit && (
               <div className="flex justify-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#10368c]" />
               </div>
             )}
 
@@ -401,7 +450,7 @@ export default function Signup() {
                       <button
                         type="button"
                         onClick={handleResendCode}
-                        className="text-teal-600 font-semibold text-sm"
+                        className="text-[#10368c] font-semibold text-sm"
                       >
                         {t("signup:link.resendVerificationCode")}
                       </button>
@@ -422,7 +471,7 @@ export default function Signup() {
 
             {submit && (
               <div className="flex justify-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#10368c]" />
               </div>
             )}
 
@@ -452,7 +501,7 @@ export default function Signup() {
           <div className="pt-4 text-center">
             <div className="py-12">
               <div className="flex justify-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#10368c]" />
               </div>
               <P color="grey700">Logging you in...</P>
             </div>

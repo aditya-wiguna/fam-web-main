@@ -201,7 +201,7 @@ export default function Redeem() {
         </HighlightHeader>
         <HighlightBody>
           <div className="flex justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#10368c]" />
           </div>
         </HighlightBody>
       </div>
@@ -253,7 +253,7 @@ export default function Redeem() {
       {/* Fund Name */}
       <div className="mb-4">
         <Small color="grey500">{t("subscription:form.label.fund")}</Small>
-        <P className="font-semibold" style={{ color: colors.teal700 }}>{product.name}</P>
+        <P className="font-semibold" style={{ color: colors.purple700 }}>{product.name}</P>
       </div>
 
       {/* Fund Class Selection */}
@@ -380,7 +380,7 @@ export default function Redeem() {
               type="checkbox"
               checked={orderData.disclaimerAccepted || false}
               onChange={(e) => updateField("disclaimerAccepted", e.target.checked)}
-              className="mt-1 w-5 h-5 text-teal-600 rounded"
+              className="mt-1 w-5 h-5 text-[#10368c] rounded"
             />
             <span className="text-sm">{t("subscription:text.redemption.message")}</span>
           </label>
@@ -404,7 +404,7 @@ export default function Redeem() {
       <Card className="mb-6">
         <div className="mb-3">
           <Small color="grey500">{t("subscription:form.label.fund")}</Small>
-          <P className="font-semibold" style={{ color: colors.teal700 }}>{product.name}</P>
+          <P className="font-semibold" style={{ color: colors.purple700 }}>{product.name}</P>
         </div>
 
         <div className="mb-3">

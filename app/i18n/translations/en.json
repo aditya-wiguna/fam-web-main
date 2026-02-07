@@ -154,6 +154,7 @@
     "error.clientEmailNotFound": "Email not found. Please enter the email address you registered with us",
     "error.clientEmailFound": "We understand that you are a valued investor of FAM. Please register your account by choosing 'I am a FAM client'",
     "error.signup": "Unable to sign up",
+    "error.captcha": "Captcha verification failed. Please try again",
     "error.invalidCode": "Invalid OTP",
     "error.unableToResendCode": "Unable to resend OTP. Please try again",
     "error.login.invalidCredentials": "Email and/or password is invalid",

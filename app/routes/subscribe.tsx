@@ -116,7 +116,21 @@ export default function Subscribe() {
   }, [orderData.classId, product, orderData.currency]);
 
   const updateField = useCallback((field: keyof OrderData, value: unknown) => {
-    setOrderData(prev => ({ ...prev, [field]: value }));
+    if (field === "amount") {
+      // Handle amount as number, strip non-numeric except decimal
+      let strValue = String(value).replace(/[^0-9.]/g, "");
+      // Limit to 2 decimal places
+      const decimalIndex = strValue.indexOf(".");
+      if (decimalIndex > -1) {
+        const maxLength = decimalIndex + 2 + 1;
+        if (strValue.length > maxLength) {
+          strValue = strValue.substring(0, maxLength);
+        }
+      }
+      setOrderData(prev => ({ ...prev, [field]: strValue }));
+    } else {
+      setOrderData(prev => ({ ...prev, [field]: value }));
+    }
   }, []);
 
   // Calculate minimum value
@@ -131,11 +145,12 @@ export default function Subscribe() {
   const fundSuitability = parseInt(String(product?.fund?.suitability || 0));
   const needToAcceptRisk = maxRiskProfileRating < fundSuitability;
 
-  // Validation
+  // Validation - convert amount to number for comparison
+  const amountValue = Number(orderData.amount) || 0;
   const hasDividendOption = selectedClass?.dividendOption || false;
   const isValid = 
     orderData.classId &&
-    Number(orderData.amount) > 0 &&
+    amountValue > 0 &&
     (!hasDividendOption || orderData.dividendOption) &&
     (!needToAcceptRisk || orderData.riskAccepted);
 
@@ -148,7 +163,8 @@ export default function Subscribe() {
   };
 
   const next = () => {
-    if (Number(orderData.amount) < minimumValue) {
+    const amountValue = Number(orderData.amount) || 0;
+    if (amountValue < minimumValue) {
       setShowMinAmountWarning(true);
     } else {
       setStep(step + 1);
@@ -157,7 +173,12 @@ export default function Subscribe() {
 
   const submit = async () => {
     try {
-      await save(orderData as unknown as Record<string, unknown>);
+      // Convert amount to number before saving
+      const submitData = {
+        ...orderData,
+        amount: Number(orderData.amount) || 0,
+      };
+      await save(submitData as unknown as Record<string, unknown>);
       navigate(`/subscribe/success?productId=${productId}`);
     } catch (e) {
       console.error("Error submitting order", e);
@@ -172,7 +193,7 @@ export default function Subscribe() {
         </HighlightHeader>
         <HighlightBody>
           <div className="flex justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#10368c]" />
           </div>
         </HighlightBody>
       </div>
@@ -202,7 +223,7 @@ export default function Subscribe() {
       {/* Fund Name */}
       <div className="mb-4">
         <Small color="grey500">{t("subscription:form.label.fund")}</Small>
-        <P className="font-semibold" style={{ color: colors.teal700 }}>{product.name}</P>
+        <P className="font-semibold" style={{ color: colors.purple700 }}>{product.name}</P>
       </div>
 
       {/* Risk Rating */}
@@ -225,7 +246,7 @@ export default function Subscribe() {
               type="checkbox"
               checked={orderData.riskAccepted || false}
               onChange={(e) => updateField("riskAccepted", e.target.checked)}
-              className="mt-1 w-5 h-5 text-teal-600 rounded"
+              className="mt-1 w-5 h-5 text-[#10368c] rounded"
             />
             <span className="text-sm">{t("subscription:alert.risk.message")}</span>
           </label>
@@ -277,8 +298,9 @@ export default function Subscribe() {
             {t("subscription:form.label.investmentAmount")} ({selectedClass.baseCurrencyCode})
           </Small>
           <Input
-            type="number"
-            value={orderData.amount === 0 ? "" : String(orderData.amount)}
+            type="text"
+            inputMode="decimal"
+            value={orderData.amount === 0 || orderData.amount === "0" ? "" : String(orderData.amount)}
             onValueChange={(val) => updateField("amount", val)}
             placeholder={t("subscription:form.help.investmentAmount", {
               currency: selectedClass.baseCurrencyCode,
@@ -336,7 +358,7 @@ export default function Subscribe() {
         
         <div className="mb-3">
           <Small color="grey500">{t("subscription:form.label.fund")}</Small>
-          <P className="font-semibold" style={{ color: colors.teal700 }}>{product.name}</P>
+          <P className="font-semibold" style={{ color: colors.purple700 }}>{product.name}</P>
         </div>
 
         <div className="mb-3">

@@ -111,10 +111,10 @@ export function useProfileService() {
     }
   }, [t, user]);
 
-  const getUnregistered = useCallback(async (email: string, code: string) => {
+  const getUnregistered = useCallback(async (email: string, code: string): Promise<{ registered?: boolean; data?: { firstName?: string } }> => {
     try {
       setLoading(true);
-      const data = await api.get(`/customer/v1/customers/unregistered-investors?email=${email}&code=${code}`);
+      const data = await api.get<{ firstName?: string }>(`/customer/v1/customers/unregistered-investors?email=${email}&code=${code}`);
       setLoading(false);
       return { registered: false, data };
     } catch (e: unknown) {

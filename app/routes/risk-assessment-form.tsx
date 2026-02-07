@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext, useRef, useCallback } from "react";
+import { useEffect, useState, useContext, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { useTranslation } from "react-i18next";
 import { H1, P, Button, TopNav, Alert, Progress, Radio } from "../components";
@@ -44,9 +44,8 @@ export default function RiskAssessmentForm() {
   const [template, setTemplate] = useState<FormTemplate | null>(null);
   const [riskAnswer, setRiskAnswer] = useState<Record<string, string>>({});
   const [step, setStep] = useState(0);
-  const [isComplete, setIsComplete] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const saveCalledRef = useRef(false);
 
   const mode = searchParams.get("mode") || "update";
   const productId = searchParams.get("productId");
@@ -63,7 +62,7 @@ export default function RiskAssessmentForm() {
     loadTemplate();
   }, [getLatestPublished]);
 
-  const getQuestionOptionsForCalc = useCallback((question: Question): QuestionOption[] => {
+  const getQuestionOptions = (question: Question): QuestionOption[] => {
     if (question.options && question.options.length > 0) {
       return question.options.map((opt) => ({
         value: opt.value || opt.id || "",
@@ -79,83 +78,64 @@ export default function RiskAssessmentForm() {
       }));
     }
     return [];
-  }, []);
+  };
 
-  // Handle completion and save
-  const handleComplete = useCallback(async () => {
-    if (!template?.form?.questions || !profile?.id || isSaving) return;
-    
-    setIsSaving(true);
-    setIsComplete(true);
-    
-    // Calculate total score
-    let totalScore = 0;
-    template.form.questions.forEach((q) => {
-      const question = q as Question;
-      const answerValue = riskAnswer[question.id];
-      const options = getQuestionOptionsForCalc(question);
-      const selectedAnswer = options.find((opt) => opt.value === answerValue);
-      if (selectedAnswer?.points) {
-        totalScore += selectedAnswer.points;
-      }
-    });
-
-    const riskProfilePayload = {
-      riskAnswer,
-      riskAssessmentDate: new Date().toISOString(),
-      riskScore: totalScore,
-      templateId: template.id,
-    };
-
-    try {
-      console.log("Saving risk profile...", riskProfilePayload);
-      const riskProfileData = await save(profile.id, riskProfilePayload);
-      console.log("Risk profile saved:", riskProfileData);
-      
-      // The API should return formTemplate, but if not, we add it from our loaded template
-      const dataWithTemplate = {
-        ...riskProfileData,
-        formTemplate: riskProfileData.formTemplate || template,
-        riskScore: totalScore,
-      };
-      
-      // Update context
-      updateRiskProfileData(dataWithTemplate);
-      console.log("Risk profile data updated in context");
-
-      // Build target URL based on mode
-      let targetUrl = "/risk-profile";
-      if (mode === "subscribe" && productId) {
-        // If coming from subscribe flow, go back to fund details
-        targetUrl = `/fund/${productId}`;
-      } else {
-        const params = new URLSearchParams();
-        if (mode) params.set("mode", mode);
-        if (productId) params.set("productId", productId);
-        targetUrl = `/risk-profile?${params.toString()}`;
-      }
-      console.log("Will navigate to:", targetUrl);
-      
-      // Navigate after delay
-      setTimeout(() => {
-        console.log("Navigating now to:", targetUrl);
-        navigate(targetUrl);
-      }, 1500);
-    } catch (e) {
-      console.error("Error saving risk profile", e);
-      setIsComplete(false);
-      setIsSaving(false);
-    }
-  }, [template, profile, riskAnswer, save, updateRiskProfileData, navigate, mode, productId, isSaving, getQuestionOptionsForCalc]);
-
-  // Trigger completion when reaching the end
+  // Check if complete and save - using ref to prevent double execution
   useEffect(() => {
-    if (!template?.form?.questions) return;
-    const totalSteps = template.form.questions.length;
-    if (totalSteps > 0 && step === totalSteps && !isComplete && !isSaving) {
-      handleComplete();
+    async function checkComplete() {
+      if (!template?.form?.questions || !profile?.id) return;
+      if (saveCalledRef.current) return; // Prevent double save
+      
+      const totalSteps = template.form.questions.length;
+      if (totalSteps > 0 && step === totalSteps) {
+        saveCalledRef.current = true; // Mark as called
+        
+        // Calculate total score
+        let totalScore = 0;
+        template.form.questions.forEach((q) => {
+          const question = q as Question;
+          const answerValue = riskAnswer[question.id];
+          const options = getQuestionOptions(question);
+          const selectedAnswer = options.find((opt) => opt.value === answerValue);
+          if (selectedAnswer?.points) {
+            totalScore += selectedAnswer.points;
+          }
+        });
+
+        const riskProfilePayload = {
+          riskAnswer,
+          riskAssessmentDate: new Date().toISOString(),
+          riskScore: totalScore,
+          templateId: template.id,
+        };
+
+        try {
+          console.log("Saving risk profile...", riskProfilePayload);
+          const riskProfileData = await save(profile.id, riskProfilePayload);
+          console.log("Risk profile saved:", riskProfileData);
+          
+          // Update context
+          updateRiskProfileData(riskProfileData);
+
+          // Navigate after delay
+          setTimeout(() => {
+            if (mode === "subscribe" && productId) {
+              navigate(`/fund/${productId}`, { replace: true });
+            } else {
+              const params = new URLSearchParams();
+              if (mode) params.set("mode", mode);
+              if (productId) params.set("productId", productId);
+              navigate(`/risk-profile?${params.toString()}`, { replace: true });
+            }
+          }, 1500);
+        } catch (e) {
+          console.error("Error saving risk profile", e);
+          saveCalledRef.current = false; // Reset on error to allow retry
+        }
+      }
     }
-  }, [step, template, isComplete, isSaving, handleComplete]);
+    checkComplete();
+  }, [step, template, profile?.id, riskAnswer, save, updateRiskProfileData, navigate, mode, productId]);
 
   const scrollToTop = () => {
     if (scrollRef.current) {
@@ -176,25 +156,6 @@ export default function RiskAssessmentForm() {
   const next = () => {
     setStep(step + 1);
     scrollToTop();
-  };
-
-  const getQuestionOptions = (question: Question): QuestionOption[] => {
-    // Handle different option formats from API
-    if (question.options && question.options.length > 0) {
-      return question.options.map((opt) => ({
-        value: opt.value || opt.id || "",
-        label: opt.label || opt.text || "",
-        points: opt.points || opt.score || 0,
-      }));
-    }
-    if (question.answerConfig?.options) {
-      return question.answerConfig.options.map((opt) => ({
-        value: opt.config.value,
-        label: opt.config.label,
-        points: 0,
-      }));
-    }
-    return [];
   };
 
   const questions = (template?.form?.questions || []) as Question[];
@@ -266,6 +227,14 @@ export default function RiskAssessmentForm() {
           />
         </div>
         <P className="font-semibold">{t("riskAssessment:text.calculate")}</P>
+        {error && (
+          <div className="mt-4">
+            <Alert>{error}</Alert>
+            <Button onClick={() => { saveCalledRef.current = false; setStep(step); }} className="mt-4">
+              Retry
+            </Button>
+          </div>
+        )}
       </div>
     );
   };
@@ -289,34 +258,32 @@ export default function RiskAssessmentForm() {
       </HighlightHeader>
 
       <HighlightBody className="flex-1 pb-8">
-        {(error || templateError) && (
+        {(error || templateError) && step !== totalSteps && (
           <Alert className="mb-4">{error || templateError}</Alert>
         )}
 
-        {(loading || templateLoading) && !isComplete && (
+        {(loading || templateLoading) && step !== totalSteps && (
           <div className="flex justify-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-500" />
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#10368c]" />
           </div>
         )}
 
-        {!templateLoading && !isComplete && (
+        {!templateLoading && step !== totalSteps && (
           <div className="mt-4">
             {renderQuestion()}
             
-            {step !== totalSteps && (
-              <div className="space-y-3 mt-6">
-                <Button onClick={next} disabled={!answered} className="w-full">
-                  {t("common:button.next")}
-                </Button>
-                <Button outline onClick={back} className="w-full">
-                  {t("common:button.back")}
-                </Button>
-              </div>
-            )}
+            <div className="space-y-3 mt-6">
+              <Button onClick={next} disabled={!answered} className="w-full">
+                {t("common:button.next")}
+              </Button>
+              <Button outline onClick={back} className="w-full">
+                {t("common:button.back")}
+              </Button>
+            </div>
           </div>
         )}
 
-        {(isComplete || step === totalSteps) && renderComplete()}
+        {step === totalSteps && renderComplete()}
       </HighlightBody>
     </div>
   );
