@@ -1,7 +1,6 @@
-import { useState, useContext, useEffect, useRef, useCallback } from "react";
+import { useState, useContext, useEffect, useRef, useCallback, lazy, Suspense } from "react";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
-import HCaptcha from "@hcaptcha/react-hcaptcha";
 import { Button, Input, Alert, TopNav, Link, H1, P, PinField } from "../components";
 import { AuthContext } from "../contexts";
 import { useAuth, useProfileService } from "../services";
@@ -11,6 +10,9 @@ import successImage from "../assets/images/success.png";
 import colors from "../theme/colors";
 import { IoCheckmarkCircle } from "react-icons/io5";
 import hCaptchaConfig from "../config/hcaptcha.config";
+
+// Dynamically import HCaptcha to avoid SSR issues
+const HCaptcha = lazy(() => import("@hcaptcha/react-hcaptcha"));
 
 type Step = "type" | "email" | "password" | "verification" | "autoLogin" | "success";
 
@@ -34,7 +36,9 @@ export default function Signup() {
   const [error, setError] = useState("");
   const [submit, setSubmit] = useState(false);
   const [captchaToken, setCaptchaToken] = useState("");
-  const captchaRef = useRef<HCaptcha>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const captchaRef = useRef<any>(null);
+  const [isClient, setIsClient] = useState(false);
 
   // OTP expiry countdown
   const [verificationCodeExpiry, setVerificationCodeExpiry] = useState<Date | null>(null);
@@ -46,6 +50,11 @@ export default function Signup() {
       navigate("/");
     }
   }, [user, navigate]);
+
+  // Detect client-side rendering
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // Countdown timer effect
   useEffect(() => {
@@ -302,15 +311,19 @@ export default function Signup() {
                   />
                 </div>
 
-                {/* Invisible hCaptcha */}
-                <HCaptcha
-                  ref={captchaRef}
-                  sitekey={hCaptchaConfig.siteKey}
-                  size="invisible"
-                  onVerify={onCaptchaVerify}
-                  onExpire={onCaptchaExpire}
-                  onError={onCaptchaError}
-                />
+                {/* Invisible hCaptcha - only render on client */}
+                {isClient && (
+                  <Suspense fallback={null}>
+                    <HCaptcha
+                      ref={captchaRef}
+                      sitekey={hCaptchaConfig.siteKey}
+                      size="invisible"
+                      onVerify={onCaptchaVerify}
+                      onExpire={onCaptchaExpire}
+                      onError={onCaptchaError}
+                    />
+                  </Suspense>
+                )}
 
                 <Button
                   type="submit"
