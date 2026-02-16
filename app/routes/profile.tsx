@@ -37,7 +37,7 @@ export default function Profile() {
           <TopNav inverse showLogo />
           <H1 color="white" className="text-3xl mb-2">{t("profile:heading.title")}</H1>
         </HighlightHeader>
-        <HighlightBody className="min-h-[60vh]">
+        <HighlightBody className="min-h-[90vh]">
           <div className="text-center py-12">
             <P color="grey500" className="my-4">Please login to view your profile</P>
             <Button onClick={() => navigate("/login")}>{t("login:button.login")}</Button>
@@ -160,7 +160,7 @@ export default function Profile() {
         </div>
       </HighlightHeader>
 
-      <HighlightBody color="whiteRGBA" className="min-h-[50vh] pb-24">
+      <HighlightBody color="whiteRGBA" className="min-h-[90vh] pb-24">
         <div className="space-y-1">
           {menus.map((menu) => (
             <button

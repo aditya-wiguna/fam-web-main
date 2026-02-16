@@ -57,12 +57,12 @@ export function VisitorHome() {
         </div>
 
         {/* Strategies section title - matching mobile H2 style */}
-        <H2 color="white" className="text-2xl leading-[30px] font-light mt-0 mb-0">
+        <H2 color="white" className="text-2xl leading-[30px] font-light mt-0 mb-2">
           {t("home:section.strategies.title")}
         </H2>
       </HighlightHeader>
 
-      <HighlightBody color="whiteRGBA" className="min-h-[60vh] pb-[70px]">
+      <HighlightBody color="whiteRGBA" className="min-h-[90vh] pb-[70px]">
         <Skeleton loading={loading}>
           {/* Strategy tabs - horizontal scroll matching mobile filterContainer */}
           <div className="h-[50px]">

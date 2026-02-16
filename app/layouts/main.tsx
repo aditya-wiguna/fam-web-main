@@ -3,7 +3,7 @@ import { BottomNav } from "../components";
 
 export default function MainLayout() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white pb-20">
+    <div className="min-h-screen" style={{ backgroundColor: "#0a1847" }}>
       <Outlet />
       <BottomNav />
     </div>
