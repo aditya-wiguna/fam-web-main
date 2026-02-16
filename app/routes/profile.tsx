@@ -132,12 +132,12 @@ export default function Profile() {
             <Card className="mt-4 bg-white/10 border-white/20">
               <div className="flex items-center justify-between">
                 <div>
-                  <Small color="grey300">Your Risk Profile</Small>
-                  <P color="white" className="font-semibold">{riskProfile.profile.name}</P>
+                  <Small className="text-[#0a1847]">Your Risk Profile</Small>
+                  <P className="font-semibold text-[#0a1847]">{riskProfile.profile.name}</P>
                 </div>
                 <button
                   onClick={() => navigate("/risk-profile")}
-                  className="text-[#6699DD] text-sm"
+                  className="text-[#0a1847] text-sm"
                 >
                   View →
                 </button>
