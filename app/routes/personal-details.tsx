@@ -20,7 +20,6 @@ const countryNameMap: Record<string, string> = {
 };
 
 const field1List = [
-  { key: "name", field: "NAME" },
   { key: "nameFirst", field: "NAME_FIRST" },
   { key: "nameLast", field: "NAME_LAST" },
   { key: "contactMobile", field: "CONTACT_MOBILE" },
