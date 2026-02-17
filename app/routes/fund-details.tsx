@@ -141,7 +141,7 @@ export default function FundDetails() {
   };
 
   const completePersonalInfo = () => {
-    navigate(`/signup/info?mode=subscribe&productId=${id}`);
+    navigate(`/personal-details?mode=subscribe&productId=${id}`);
   };
 
   const completeRiskProfile = () => {

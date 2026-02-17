@@ -42,6 +42,26 @@ export function useProfileService() {
         body = processProfile(idOrProfile);
       }
       
+      // If id is still missing, try to get it from the body or fetch fresh
+      if (!id || id === "undefined" || id === "null") {
+        if (body.id && body.id !== "undefined" && body.id !== "null") {
+          id = body.id as string;
+        }
+      }
+      if (!id || id === "undefined" || id === "null") {
+        if (user?.userId) {
+          // Fetch profile to get the customer ID
+          const result = await api.get<Profile[]>(`/customer/v1/customers?query=userId==${user.userId}`);
+          if (result && result.length > 0 && result[0].id) {
+            id = result[0].id;
+          }
+        }
+      }
+      
+      if (!id || id === "undefined" || id === "null") {
+        throw new Error("Customer ID is required to save profile");
+      }
+      
       const data = await api.put<Profile>(`/customer/v1/customers/${id}`, body);
       setLoading(false);
       return data;
@@ -51,13 +71,26 @@ export function useProfileService() {
       setLoading(false);
       throw e;
     }
-  }, [t]);
+  }, [t, user]);
 
   const saveDeclarationInfo = useCallback(async (id: string, additionalInfo: Record<string, unknown>) => {
     try {
       setError("");
       setLoading(true);
-      const data = await api.put(`/customer/v1/customers/${id}/additional/declaration`, additionalInfo);
+      
+      let customerId = id;
+      // Fallback: fetch customer ID if missing
+      if ((!customerId || customerId === "undefined" || customerId === "null") && user?.userId) {
+        const result = await api.get<Profile[]>(`/customer/v1/customers?query=userId==${user.userId}`);
+        if (result && result.length > 0 && result[0].id) {
+          customerId = result[0].id;
+        }
+      }
+      if (!customerId || customerId === "undefined" || customerId === "null") {
+        throw new Error("Customer ID is required to save declaration");
+      }
+      
+      const data = await api.put(`/customer/v1/customers/${customerId}/additional/declaration`, additionalInfo);
       setLoading(false);
       return data;
     } catch (e) {
@@ -66,7 +99,7 @@ export function useProfileService() {
       setLoading(false);
       throw e;
     }
-  }, [t]);
+  }, [t, user]);
 
   const get = useCallback(async (id?: string): Promise<Profile> => {
     const userId = id || user?.userId;

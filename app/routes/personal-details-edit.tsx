@@ -80,7 +80,7 @@ export default function PersonalDetailsEdit() {
     try {
       setSubmitError("");
       
-      // Trim string values and set profileType
+      // Build the profile data to save from current form data
       const profileToSave = { ...data };
       Object.keys(profileToSave).forEach((key) => {
         const value = profileToSave[key];
@@ -92,9 +92,23 @@ export default function PersonalDetailsEdit() {
         profileToSave.profileType = "MANUAL";
       }
       
-      await save(data.id as string, profileToSave);
-      const updatedProfile = await get(data.userId as string);
-      updateProfileData(updatedProfile);
+      // Ensure the profile data includes the id from context
+      if (profile?.id) {
+        profileToSave.id = profile.id;
+      }
+      if (profile?.userId) {
+        profileToSave.userId = profile.userId;
+      }
+      
+      // Use save(profile) overload - pass the whole object so save() can extract id itself
+      await save(profileToSave as unknown as import("../contexts").Profile);
+      
+      // Refresh profile after save
+      const userId = profile?.userId || data.userId || user?.userId;
+      if (userId) {
+        const updatedProfile = await get(userId as string);
+        updateProfileData(updatedProfile);
+      }
       
       if (mode === "subscribe" && productId) {
         if (riskProfile) {

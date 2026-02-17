@@ -100,9 +100,20 @@ export default function DeclarationsEdit() {
   const handleSubmit = async () => {
     try {
       setSubmitError("");
-      await saveDeclarationInfo(data.id as string, data);
-      const updatedProfile = await get(data.userId as string);
-      updateProfileData(updatedProfile);
+      
+      const customerId = profile?.id || data.id as string;
+      if (!customerId) {
+        setSubmitError("Unable to save: customer ID not found. Please try logging out and back in.");
+        return;
+      }
+      
+      await saveDeclarationInfo(customerId, data);
+      
+      const userId = profile?.userId || data.userId || user?.userId;
+      if (userId) {
+        const updatedProfile = await get(userId as string);
+        updateProfileData(updatedProfile);
+      }
       navigate("/declarations");
     } catch (e) {
       console.error("Error saving declaration", e);

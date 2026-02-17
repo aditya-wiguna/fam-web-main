@@ -301,7 +301,7 @@ export default function Login() {
                 </Button>
               </div>
 
-              <Button
+              {/* <Button
                 type="button"
                 outline
                 onClick={handleSingpassLogin}
@@ -310,7 +310,7 @@ export default function Login() {
               >
                 <span style={{ color: colors.teal500 }}>{t("login:button.login.with")} </span>
                 <span className="text-red-600 font-bold">{t("login:button.login.singpass")}</span>
-              </Button>
+              </Button> */}
             </form>
           )}
 
